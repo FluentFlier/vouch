@@ -3,6 +3,8 @@ node_modules/
 .env.local
 .env.vouch
 dist/
+packages/core/src/*.js
+packages/core/src/*.d.ts
 __pycache__/
 *.pyc
 .DS_Store
@@ -16,6 +18,7 @@ __pycache__/
 .agents
 .augment
 .claude
+.claude-flow
 .cline
 .github/copilot*
 .kilocode
@@ -24,3 +27,13 @@ __pycache__/
 .roo
 .trae
 .windsurf
+.swarm
+.factory
+.kiro
+.vibe
+
+# Workflow/build prompts
+CLAUDE.md
+.mcp.json
+vouch-build.md
+skills-lock.json
