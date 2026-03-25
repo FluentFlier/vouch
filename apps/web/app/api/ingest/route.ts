@@ -72,10 +72,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const body = await req.json();
     const parsed = ActionLogSchema.parse(body);
 
-    const db = supabaseAdmin.database;
-
     // Upsert project
-    const { data: project, error: projectError } = await db
+    const { data: project, error: projectError } = await supabaseAdmin
       .from('vouch_projects')
       .upsert(
         { slug: parsed.projectSlug, name: parsed.projectSlug },
@@ -89,7 +87,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     // Insert log entry (no actionPayload - only behavioral metadata)
-    const { error: insertError } = await db
+    const { error: insertError } = await supabaseAdmin
       .from('vouch_action_logs')
       .insert({
         id: parsed.id,

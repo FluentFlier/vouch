@@ -1,8 +1,8 @@
-import { createClient } from '@insforge/sdk';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
-const baseUrl = process.env.NEXT_PUBLIC_INSFORGE_URL ?? '';
-const anonKey = process.env.NEXT_PUBLIC_INSFORGE_ANON_KEY ?? '';
-const serviceKey = process.env.INSFORGE_SERVICE_KEY ?? '';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || 'placeholder';
 
-export const supabase = createClient({ baseUrl, anonKey });
-export const supabaseAdmin = createClient({ baseUrl, anonKey: serviceKey });
+export const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+export const supabaseAdmin: SupabaseClient = createClient(supabaseUrl, supabaseServiceKey);

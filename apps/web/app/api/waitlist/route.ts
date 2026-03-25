@@ -9,9 +9,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ ok: false, error: 'invalid_email' }, { status: 400 });
     }
 
-    const db = supabaseAdmin.database;
-
-    const { error } = await db
+    const { error } = await supabaseAdmin
       .from('vouch_waitlist')
       .upsert(
         { email: email.toLowerCase().trim() },

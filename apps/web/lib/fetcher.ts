@@ -42,9 +42,7 @@ export interface ProjectData {
 }
 
 export async function fetchProjectStats(slug: string): Promise<ProjectData | null> {
-  const db = supabase.database;
-
-  const { data: stats, error: statsError } = await db
+  const { data: stats, error: statsError } = await supabase
     .from('vouch_project_stats')
     .select('*')
     .eq('slug', slug)
@@ -52,18 +50,18 @@ export async function fetchProjectStats(slug: string): Promise<ProjectData | nul
 
   if (statsError || !stats) return null;
 
-  const { data: breakdown } = await db
+  const { data: breakdown } = await supabase
     .from('vouch_policy_breakdown')
     .select('*')
     .eq('project_id', stats.project_id);
 
-  const { data: daily } = await db
+  const { data: daily } = await supabase
     .from('vouch_daily_pass_rate')
     .select('*')
     .eq('project_id', stats.project_id)
     .order('day', { ascending: true });
 
-  const { data: activity } = await db
+  const { data: activity } = await supabase
     .from('vouch_action_logs')
     .select('id, action_type, verdict, policy_triggered, duration_ms, created_at, user_decision')
     .eq('project_id', stats.project_id)

@@ -6,6 +6,10 @@ from vouch.client import VouchClient, create_vouch
 from vouch.types import VouchConfig, VouchInput, VouchHooks, PolicyResult, VouchBlockedError
 
 
+async def make_async(value):
+    return value
+
+
 def make_config(mode="observe"):
     return VouchConfig(
         project_slug="test-agent",
@@ -53,7 +57,7 @@ class TestVouchClient(unittest.TestCase):
         client = VouchClient(config)
         result = await client.protect(
             VouchInput(action_type="delete_file"),
-            execute_fn=lambda: asyncio.coroutine(lambda: "executed")(),
+            execute_fn=lambda: make_async("executed"),
         )
         # In observe mode, execute_fn runs even on BLOCK
         self.assertEqual(result, "executed")
@@ -73,7 +77,7 @@ class TestVouchClient(unittest.TestCase):
         with self.assertRaises(VouchBlockedError):
             await client.protect(
                 VouchInput(action_type="delete_file"),
-                execute_fn=lambda: asyncio.coroutine(lambda: "executed")(),
+                execute_fn=lambda: make_async("executed"),
             )
 
     @async_test

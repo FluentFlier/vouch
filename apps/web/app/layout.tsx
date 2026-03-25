@@ -4,7 +4,7 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'Vouch - Runtime Safety for AI Agents',
   description: 'Define what your AI agent is allowed to do. Enforce at runtime. Prove compliance with a public trust page. Zero user data stored.',
-  metadataBase: new URL('https://xyvcwum6.insforge.site'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? 'https://vouch.run'),
   openGraph: {
     title: 'Vouch - Runtime Safety for AI Agents',
     description: 'Define what your AI agent is allowed to do. Enforce at runtime. Prove compliance publicly.',
