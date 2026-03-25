@@ -27,6 +27,7 @@ jobs:
           node-version: '20'
       - run: npm install -g pnpm
       - run: pnpm install
+      - run: pnpm --filter @vouch/core run build
       - run: pnpm --filter @vouch/core run test
       - run: pnpm --filter vouch-sdk run build
 
@@ -49,7 +50,6 @@ jobs:
           node-version: '20'
       - run: npm install -g pnpm
       - run: pnpm install
+      - run: pnpm --filter @vouch/core run build
+      - run: pnpm --filter vouch-sdk run build
       - run: pnpm --filter web run build
-    env:
-      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
