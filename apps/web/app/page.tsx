@@ -90,7 +90,7 @@ export default function HomePage() {
           className="text-sm text-vouch-muted max-w-lg text-center leading-relaxed mb-14"
           style={{ animation: 'fade-in 1s ease-out 0.4s both', opacity: 0.5 }}
         >
-          Define policies. Enforce at runtime. Prove compliance with a public trust page.
+          One npm install. One wrapper function. Every agent action checked against your policies before it runs.
         </p>
 
         {/* Waitlist */}
@@ -178,7 +178,7 @@ export default function HomePage() {
           Three steps to verified agents
         </h2>
         <p className="text-vouch-muted text-sm text-center mb-16 max-w-md mx-auto">
-          From policy definition to public proof in minutes.
+          Install the SDK, write a policy file, wrap your agent actions.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -210,8 +210,8 @@ export default function HomePage() {
             {
               num: '03',
               color: '#DC2626',
-              title: 'Prove compliance',
-              desc: 'Public trust page at vouch.run/your-slug. Pass rate, actions verified, policies triggered. Zero user content stored.',
+              title: 'Ship with confidence',
+              desc: 'Behavioral audit trail shows pass rate, actions verified, policies triggered. Self-host the dashboard or use the API. Zero user content stored.',
               icon: (
                 <svg width="36" height="36" viewBox="0 0 36 36" fill="none" className="mb-5">
                   <circle cx="18" cy="18" r="13" stroke="#DC2626" strokeWidth="1.5" opacity="0.5"/>
