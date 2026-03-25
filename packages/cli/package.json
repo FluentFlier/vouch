@@ -1,0 +1,20 @@
+{
+  "name": "vouch",
+  "version": "0.1.0",
+  "description": "CLI for the Vouch runtime safety protocol",
+  "type": "module",
+  "bin": {
+    "vouch": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@vouch/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.0"
+  },
+  "license": "MIT"
+}
