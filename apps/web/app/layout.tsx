@@ -3,7 +3,19 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Vouch - Runtime Safety for AI Agents',
-  description: 'Open-source runtime behavioral safety protocol for AI agents.',
+  description: 'Define what your AI agent is allowed to do. Enforce at runtime. Prove compliance with a public trust page. Zero user data stored.',
+  metadataBase: new URL('https://xyvcwum6.insforge.site'),
+  openGraph: {
+    title: 'Vouch - Runtime Safety for AI Agents',
+    description: 'Define what your AI agent is allowed to do. Enforce at runtime. Prove compliance publicly.',
+    siteName: 'Vouch',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Vouch - Runtime Safety for AI Agents',
+    description: 'The safety layer between your AI agent and the real world.',
+  },
 };
 
 export default function RootLayout({

@@ -39,7 +39,7 @@ export default function HomePage() {
           <a href="#how" className="text-vouch-muted text-xs hover:text-vouch-text transition-colors duration-300">How it works</a>
           <a href="#code" className="text-vouch-muted text-xs hover:text-vouch-text transition-colors duration-300">Code</a>
           <a
-            href="https://github.com/thevouch"
+            href="https://github.com/fluentflier/vouch"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 text-vouch-muted text-xs hover:text-vouch-text transition-all duration-300 border border-vouch-line hover:border-vouch-green/30 rounded-full px-3 py-1.5 hover:shadow-[0_0_15px_rgba(22,163,74,0.1)]"
@@ -296,7 +296,7 @@ export default function HomePage() {
         </div>
         <div className="mt-10">
           <a
-            href="https://github.com/thevouch"
+            href="https://github.com/fluentflier/vouch"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 text-vouch-muted text-xs hover:text-vouch-green transition-colors duration-300"
