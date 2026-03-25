@@ -1,0 +1,11 @@
+{
+  "name": "vouch",
+  "private": true,
+  "scripts": {
+    "build": "pnpm -r run build",
+    "test": "pnpm -r run test",
+    "dev": "pnpm --filter web dev",
+    "check-policies": "node packages/cli/dist/index.js check"
+  },
+  "packageManager": "pnpm@9.0.0"
+}
