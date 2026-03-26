@@ -86,8 +86,9 @@ function isTestFile(f: string): boolean {
 
 function isScannable(f: string): boolean {
   const ext = path.extname(f).toLowerCase();
-  return ['.ts', '.tsx', '.js', '.jsx', '.py', '.json', '.yaml', '.yml', '.env', '.toml', '.sh', '.bash', '.sql', '.tf', '.hcl', '.md'].includes(ext)
-    || f.endsWith('.env.example') || f.endsWith('.env.sample') || f.endsWith('.env.local');
+  const name = path.basename(f).toLowerCase();
+  const codeExts = ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.py', '.go', '.rs', '.java', '.kt', '.swift', '.rb', '.php', '.c', '.cpp', '.h', '.cs', '.json', '.yaml', '.yml', '.toml', '.sh', '.bash', '.sql', '.tf', '.hcl', '.xml', '.vue', '.svelte', '.ini', '.cfg', '.conf', '.plist', '.md'];
+  return codeExts.includes(ext) || name.startsWith('.env') || name === 'dockerfile' || name === 'makefile';
 }
 
 function getFilesToScan(paths: string[], staged: boolean): string[] {
