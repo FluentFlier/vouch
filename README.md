@@ -5,15 +5,18 @@ Vouch is an open-source security layer for AI-generated code. It gives every fil
 ```bash
 git clone https://github.com/fluentflier/vouch.git ~/.vouch
 cd ~/.vouch && npm install -g pnpm && pnpm install && pnpm run build
-mkdir -p ~/bin
-echo '#!/bin/bash
-node ~/.vouch/packages/cli/dist/index.js "$@"' > ~/bin/vouch
-chmod +x ~/bin/vouch
-echo 'export PATH="$HOME/bin:$PATH"' >> ~/.zshrc
-source ~/.zshrc
+bash ~/.vouch/scripts/install-global.sh
 ```
 
-Open a new terminal. `vouch` now works from any directory.
+Open a new terminal. `vouch` and `vouch-mcp` now work from any directory.
+
+### Connect to Claude Code (automatic)
+
+```bash
+claude mcp add vouch -s user -- vouch-mcp
+```
+
+Restart Claude Code. The AI now has access to `verify_file`, `scan_content`, `check_secret`, `check_safety`, and `check_injection` tools globally across all projects.
 
 ## Verify it works
 
