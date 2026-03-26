@@ -1,0 +1,8 @@
+export { scanForInjection, type InjectionScanResult, type InjectionSeverity } from './injection-firewall.js';
+export { scanPayload, redactPayload, type ExfiltrationScanResult, type PiiMatch } from './exfiltration-guard.js';
+export { scanMemoryChunk, scanMemoryChunks, type PoisoningScanResult, type PoisoningSeverity } from './context-poisoning.js';
+export { checkActionScope, type ScopeCheckResult, type ScopeMap } from './scope-enforcer.js';
+export { checkContextIsolation, type IsolationCheckResult } from './cross-user-firewall.js';
+export { auditCalibration, type CalibrationEntry, type CalibrationResult, type CalibrationReport } from './confidence-calibrator.js';
+export { checkUndoIntegrity, type UndoCheckResult, type UndoCapability } from './undo-integrity.js';
+export { checkSessionIntegrity, type SessionEvent, type SessionCheckResult } from './session-hijack.js';

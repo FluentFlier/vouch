@@ -5,3 +5,4 @@ export { runJacWalker } from './subprocess.js';
 export { buildLogEntry, sendLogEntry } from './log.js';
 export * from './types.js';
 export * from './constants.js';
+export * from './scanners/index.js';
