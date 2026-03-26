@@ -1,22 +1,22 @@
 {
   "name": "vouch-mcp",
   "version": "0.1.0",
-  "description": "MCP server for Vouch - AI agents check security before writing code",
+  "description": "MCP server for Vouch - AI coding tools check security before writing code",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "dist/standalone.js",
   "bin": {
-    "vouch-mcp": "dist/index.js"
+    "vouch-mcp": "dist/standalone.js"
   },
   "scripts": {
-    "build": "tsc"
+    "build": "tsc && tsc src/standalone.ts --outDir dist --target ES2022 --module CommonJS --moduleResolution node --esModuleInterop --skipLibCheck"
   },
-  "dependencies": {
-    "@vouch/core": "workspace:*"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/node": "^20.11.0",
+    "@vouch/core": "workspace:*",
     "typescript": "^5.3.0"
   },
-  "keywords": ["mcp", "ai", "security", "vouch", "claude", "cursor"],
+  "keywords": ["mcp", "ai", "security", "vouch", "claude", "cursor", "copilot", "trust-score"],
+  "repository": { "type": "git", "url": "https://github.com/fluentflier/vouch" },
   "license": "MIT"
 }
