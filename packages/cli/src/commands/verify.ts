@@ -188,7 +188,10 @@ export async function runVerify(): Promise<void> {
   // Collect files
   const allFiles: string[] = [];
   for (const p of paths) {
-    if (!existsSync(p)) continue;
+    if (!existsSync(p)) {
+      process.stderr.write(`  Path not found: ${p}\n`);
+      continue;
+    }
     const s = statSync(p);
     if (s.isFile()) allFiles.push(p);
     else if (s.isDirectory()) walkDir(p, allFiles);
