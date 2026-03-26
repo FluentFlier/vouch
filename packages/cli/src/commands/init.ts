@@ -13,11 +13,29 @@ function configureMcp(): void {
   const servers = (config.mcpServers ?? {}) as Record<string, unknown>;
   if ('vouch' in servers) return; // Already configured
 
-  servers.vouch = {
-    command: 'npx',
-    args: ['vouch-mcp'],
-    type: 'stdio',
-  };
+  // Find the vouch MCP server binary
+  const homeVouch = `${process.env.HOME}/.vouch/packages/mcp-server/dist/index.js`;
+  const localVouch = '.vouch/packages/mcp-server/dist/index.js';
+
+  if (existsSync(homeVouch)) {
+    servers.vouch = {
+      command: 'node',
+      args: [homeVouch],
+      type: 'stdio',
+    };
+  } else if (existsSync(localVouch)) {
+    servers.vouch = {
+      command: 'node',
+      args: [require('path').resolve(localVouch)],
+      type: 'stdio',
+    };
+  } else {
+    servers.vouch = {
+      command: 'npx',
+      args: ['vouch-mcp'],
+      type: 'stdio',
+    };
+  }
 
   config.mcpServers = servers;
   writeFileSync(mcpPath, JSON.stringify(config, null, 2) + '\n');
