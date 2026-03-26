@@ -1,13 +1,14 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { Suspense } from 'react';
 import { WaitlistForm } from '@/components/WaitlistForm';
 import { GlowCard } from '@/components/GlowCard';
 import { TypeWriter } from '@/components/TypeWriter';
 
 const ParticleField = dynamic(
   () => import('@/components/ParticleField').then((m) => m.ParticleField),
-  { ssr: false }
+  { ssr: false, loading: () => null }
 );
 
 export default function HomePage() {

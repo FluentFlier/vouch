@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useState, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
@@ -133,6 +133,29 @@ function GlowRing() {
 }
 
 export function ParticleField() {
+  const [hasWebGL, setHasWebGL] = useState(true);
+
+  useEffect(() => {
+    try {
+      const canvas = document.createElement('canvas');
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      if (!gl) setHasWebGL(false);
+    } catch {
+      setHasWebGL(false);
+    }
+  }, []);
+
+  if (!hasWebGL) {
+    // CSS fallback for environments without WebGL
+    return (
+      <div className="absolute inset-0 z-0" style={{ pointerEvents: 'none' }}>
+        <div className="absolute inset-0" style={{
+          background: 'radial-gradient(ellipse at 50% 40%, rgba(22, 163, 74, 0.08) 0%, transparent 60%)',
+        }} />
+      </div>
+    );
+  }
+
   return (
     <div className="absolute inset-0 z-0" style={{ pointerEvents: 'none' }}>
       <Canvas
@@ -140,6 +163,7 @@ export function ParticleField() {
         dpr={[1, 1.5]}
         gl={{ antialias: true, alpha: true }}
         style={{ background: 'transparent' }}
+        onCreated={() => {}}
       >
         <ambientLight intensity={0.2} />
         <Particles />
