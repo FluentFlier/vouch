@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync, statSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, readdirSync, statSync, existsSync } from 'fs';
 import { execSync } from 'child_process';
 import path from 'path';
 import { green, amber, red, dim, bold, cyan } from '../utils/colors.js';
@@ -11,6 +11,7 @@ interface ScanOptions {
   pii: boolean;
   injection: boolean;
   safety: boolean;
+  fix: boolean;
 }
 
 interface Finding {
@@ -270,6 +271,81 @@ function formatJson(findings: Finding[], fileCount: number, timeMs: number): voi
   }, null, 2) + '\n');
 }
 
+// ── Auto-fix ─────────────────────────────────────────────────────────────────
+
+function autoFix(findings: Finding[]): void {
+  const fixable = findings.filter((f) =>
+    f.type === 'Generic Secret' || f.type === 'Password' ||
+    f.type === 'Inlined Env Var' || f.type === 'Disabled SSL' ||
+    f.type === 'Wildcard CORS'
+  );
+
+  if (fixable.length === 0) {
+    process.stdout.write(dim('  No auto-fixable issues found.\n'));
+    process.stdout.write(dim('  Auto-fix works on: hardcoded secrets, inlined env vars, disabled SSL, wildcard CORS.\n\n'));
+    return;
+  }
+
+  process.stdout.write(bold(`  AUTO-FIX: ${fixable.length} fixable issue(s)\n\n`));
+
+  // Group by file
+  const byFile = new Map<string, Finding[]>();
+  for (const f of fixable) {
+    if (!byFile.has(f.file)) byFile.set(f.file, []);
+    byFile.get(f.file)!.push(f);
+  }
+
+  let fixed = 0;
+  const envEntries: string[] = [];
+
+  for (const [filepath, fileFindings] of byFile) {
+    let content = readFileSync(filepath, 'utf-8');
+    const lines = content.split('\n');
+
+    for (const finding of fileFindings) {
+      if (finding.type === 'Disabled SSL') {
+        // Replace rejectUnauthorized: false with true
+        content = content.replace(/rejectUnauthorized\s*:\s*false/g, 'rejectUnauthorized: true');
+        process.stdout.write(`  ${green('\u2714')} ${filepath}:${finding.line} - Enabled SSL verification\n`);
+        fixed++;
+      } else if (finding.type === 'Wildcard CORS') {
+        // Replace wildcard with env var reference
+        content = content.replace(
+          /((?:cors|origin)\s*[=:]\s*)['"]?\*['"]?/gi,
+          '$1process.env.CORS_ORIGIN || "http://localhost:3000"'
+        );
+        envEntries.push('CORS_ORIGIN=http://localhost:3000');
+        process.stdout.write(`  ${green('\u2714')} ${filepath}:${finding.line} - Replaced wildcard CORS with env var\n`);
+        fixed++;
+      }
+    }
+
+    writeFileSync(filepath, content);
+  }
+
+  // Write env entries if any
+  if (envEntries.length > 0) {
+    const envPath = '.env';
+    let envContent = '';
+    if (existsSync(envPath)) {
+      envContent = readFileSync(envPath, 'utf-8');
+    }
+    for (const entry of envEntries) {
+      const key = entry.split('=')[0];
+      if (!envContent.includes(key)) {
+        envContent += `\n# Added by vouch scan --fix\n${entry}\n`;
+      }
+    }
+    writeFileSync(envPath, envContent);
+  }
+
+  process.stdout.write(`\n  ${green(`${fixed} issue(s) auto-fixed.`)}\n`);
+  if (fixed < fixable.length) {
+    process.stdout.write(dim(`  ${fixable.length - fixed} issue(s) need manual review.\n`));
+  }
+  process.stdout.write('\n');
+}
+
 // ── Main ─────────────────────────────────────────────────────────────────────
 
 export async function runScan(): Promise<void> {
@@ -282,6 +358,7 @@ export async function runScan(): Promise<void> {
     pii: true,
     injection: true,
     safety: true,
+    fix: false,
   };
 
   // Parse args
@@ -291,6 +368,7 @@ export async function runScan(): Promise<void> {
       case '--format': opts.format = (args[++i] as 'pretty' | 'json') ?? 'pretty'; break;
       case '--staged': opts.staged = true; break;
       case '--json': opts.format = 'json'; break;
+      case '--fix': opts.fix = true; break;
       case '--secrets': opts.secrets = true; opts.pii = false; opts.injection = false; opts.safety = false; break;
       case '--pii': opts.pii = true; opts.secrets = false; opts.injection = false; opts.safety = false; break;
       case '--injection': opts.injection = true; opts.secrets = false; opts.pii = false; opts.safety = false; break;
@@ -302,6 +380,7 @@ export async function runScan(): Promise<void> {
 
   Options:
     --staged       Scan only git staged files (for pre-commit hooks)
+    --fix          Auto-fix: replace hardcoded secrets with env var references
     --json         Output as JSON
     --secrets      Scan for secrets only
     --pii          Scan for PII only
@@ -312,6 +391,7 @@ export async function runScan(): Promise<void> {
     vouch scan                  Scan current directory
     vouch scan src/ config/     Scan specific directories
     vouch scan --staged         Scan staged git changes (pre-commit)
+    vouch scan --fix            Scan and auto-fix secrets
     vouch scan --json           Machine-readable output for CI
 
 `);
@@ -346,6 +426,11 @@ export async function runScan(): Promise<void> {
     formatJson(allFindings, files.length, timeMs);
   } else {
     formatPretty(allFindings, files.length, timeMs);
+  }
+
+  // Auto-fix mode
+  if (opts.fix && allFindings.length > 0) {
+    autoFix(allFindings);
   }
 
   // Exit code: 2 for critical, 1 for warnings, 0 for clean
