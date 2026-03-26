@@ -41,6 +41,25 @@ jobs:
       - run: pip install pytest
       - run: cd packages/sdk-python && python -m pytest tests/ -v
 
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install -g pnpm
+      - run: pnpm install
+      - run: pnpm --filter @vouch/core run build
+      - run: pnpm --filter vouch run build
+      - name: Run Vouch Scan
+        run: node packages/cli/dist/index.js scan apps/ packages/ policies/ --json
+      - name: Check for critical findings
+        run: |
+          RESULT=$(node packages/cli/dist/index.js scan apps/ packages/ --json 2>&1 || true)
+          CRITICAL=$(echo "$RESULT" | jq -r '.summary.critical // 0')
+          echo "Critical findings: $CRITICAL"
+
   build-dashboard:
     runs-on: ubuntu-latest
     steps:

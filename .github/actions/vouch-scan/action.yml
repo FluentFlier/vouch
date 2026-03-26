@@ -1,0 +1,75 @@
+name: 'Vouch Security Scan'
+description: 'Scan code for secrets, PII, injection patterns, and unsafe AI-generated code'
+author: 'FluentFlier'
+
+inputs:
+  fail-on:
+    description: 'Fail the action on: "critical" (default), "warning", or "none"'
+    required: false
+    default: 'critical'
+  paths:
+    description: 'Paths to scan (space-separated). Default: entire repo'
+    required: false
+    default: '.'
+  scan-types:
+    description: 'What to scan for: "all" (default), "secrets", "pii", "injection"'
+    required: false
+    default: 'all'
+
+outputs:
+  findings:
+    description: 'Number of findings'
+  critical:
+    description: 'Number of critical findings'
+  warning:
+    description: 'Number of warning findings'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install Vouch
+      shell: bash
+      run: |
+        npm install -g pnpm
+        cd ${{ github.action_path }}/../../..
+        pnpm install --frozen-lockfile 2>/dev/null || pnpm install
+        pnpm --filter @vouch/core run build
+        pnpm --filter vouch run build
+
+    - name: Run Vouch Scan
+      id: scan
+      shell: bash
+      run: |
+        SCAN_ARGS="${{ inputs.paths }}"
+        if [ "${{ inputs.scan-types }}" = "secrets" ]; then
+          SCAN_ARGS="$SCAN_ARGS --secrets"
+        elif [ "${{ inputs.scan-types }}" = "pii" ]; then
+          SCAN_ARGS="$SCAN_ARGS --pii"
+        elif [ "${{ inputs.scan-types }}" = "injection" ]; then
+          SCAN_ARGS="$SCAN_ARGS --injection"
+        fi
+
+        RESULT=$(node ${{ github.action_path }}/../../../packages/cli/dist/index.js scan $SCAN_ARGS --json 2>&1 || true)
+        echo "$RESULT"
+
+        CRITICAL=$(echo "$RESULT" | jq -r '.summary.critical // 0')
+        WARNING=$(echo "$RESULT" | jq -r '.summary.warning // 0')
+        TOTAL=$(echo "$RESULT" | jq -r '.findings | length // 0')
+
+        echo "findings=$TOTAL" >> $GITHUB_OUTPUT
+        echo "critical=$CRITICAL" >> $GITHUB_OUTPUT
+        echo "warning=$WARNING" >> $GITHUB_OUTPUT
+
+        FAIL_ON="${{ inputs.fail-on }}"
+        if [ "$FAIL_ON" = "critical" ] && [ "$CRITICAL" -gt 0 ]; then
+          echo "::error::Vouch found $CRITICAL critical security issue(s)"
+          exit 1
+        elif [ "$FAIL_ON" = "warning" ] && [ "$((CRITICAL + WARNING))" -gt 0 ]; then
+          echo "::error::Vouch found $CRITICAL critical and $WARNING warning issue(s)"
+          exit 1
+        fi
