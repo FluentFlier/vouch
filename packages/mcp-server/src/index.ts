@@ -21,6 +21,7 @@ import { detectSecrets } from '@vouch/core';
 import { checkCodeSafety } from '@vouch/core';
 import { scanForInjection } from '@vouch/core';
 import { scanPayload } from '@vouch/core';
+import { computeFileTrust } from '@vouch/core';
 
 // ── MCP Protocol Types ───────────────────────────────────────────────────────
 
@@ -86,6 +87,18 @@ const TOOLS = [
         source: { type: 'string', description: 'Where this content came from' },
       },
       required: ['content'],
+    },
+  },
+  {
+    name: 'verify_file',
+    description: 'Compute a deterministic trust score (0-100) for a file with line-by-line findings and fix suggestions. Call this BEFORE writing any file. If score is below 50, do NOT write the file -- fix the issues first.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        content: { type: 'string', description: 'The code content to verify' },
+        filename: { type: 'string', description: 'The filename' },
+      },
+      required: ['content', 'filename'],
     },
   },
 ];
@@ -177,6 +190,38 @@ function handleToolCall(name: string, args: Record<string, unknown>): { content:
           text: result.severity === 'CLEAN'
             ? 'CLEAN: No injection patterns found.'
             : `${result.severity}: ${result.message}`,
+        }],
+      };
+    }
+
+    case 'verify_file': {
+      const content = String(args.content ?? '');
+      const filename = String(args.filename ?? 'unknown');
+      const result = computeFileTrust(content, filename);
+
+      if (result.findings.length === 0) {
+        return {
+          content: [{
+            type: 'text',
+            text: `TRUST SCORE: ${result.score}/100 - CLEAN. No issues found in ${filename}. Safe to write.`,
+          }],
+        };
+      }
+
+      const findingsText = result.findings
+        .map((f) => `  [${f.severity}] Line ${f.line}: ${f.message}\n    FIX: ${f.fix}`)
+        .join('\n');
+
+      const recommendation = result.score < 50
+        ? 'DO NOT write this file. Fix the critical issues first.'
+        : result.score < 80
+        ? 'File has warnings. Consider fixing before writing.'
+        : 'File is acceptable. Safe to write.';
+
+      return {
+        content: [{
+          type: 'text',
+          text: `TRUST SCORE: ${result.score}/100 for ${filename}\n${recommendation}\n\n${result.findings.length} finding(s):\n${findingsText}`,
         }],
       };
     }

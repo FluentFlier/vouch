@@ -9,6 +9,11 @@ async function main(): Promise<void> {
       await runInit();
       break;
     }
+    case 'verify': {
+      const { runVerify } = await import('./commands/verify.js');
+      await runVerify();
+      break;
+    }
     case 'scan': {
       const { runScan } = await import('./commands/scan.js');
       await runScan();
@@ -33,6 +38,9 @@ async function main(): Promise<void> {
       process.stdout.write(`
   vouch - Runtime safety for AI agents and AI-generated code
 
+  Trust Verification:
+    verify    Compute trust score (0-100) per file with line-by-line findings
+
   Security Scanning:
     scan      Scan files for secrets, PII, injection patterns, unsafe code
     watch     Real-time file watcher with live security scanning
@@ -43,6 +51,8 @@ async function main(): Promise<void> {
     report    View your agent's behavioral report
 
   Usage:
+    vouch verify                Trust score for your codebase
+    vouch verify --json         Machine-readable trust report
     vouch scan                  Scan current directory
     vouch scan --staged         Scan staged git changes (pre-commit)
     vouch scan --json           Machine-readable output for CI

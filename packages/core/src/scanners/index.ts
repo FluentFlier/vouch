@@ -8,3 +8,4 @@ export { checkUndoIntegrity, type UndoCheckResult, type UndoCapability } from '.
 export { checkSessionIntegrity, type SessionEvent, type SessionCheckResult } from './session-hijack.js';
 export { detectSecrets, scanFiles, type SecretFinding, type SecretSeverity } from './secret-detector.js';
 export { checkCodeSafety, type SafetyFinding, type SafetySeverity } from './code-safety.js';
+export { computeFileTrust, computeCodebaseTrust, type FileTrustResult, type CodebaseTrustResult, type TrustFinding } from './trust-score.js';
