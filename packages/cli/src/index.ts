@@ -9,14 +9,19 @@ async function main(): Promise<void> {
       await runInit();
       break;
     }
-    case 'check': {
-      const { runCheck } = await import('./commands/check.js');
-      await runCheck();
-      break;
-    }
     case 'scan': {
       const { runScan } = await import('./commands/scan.js');
       await runScan();
+      break;
+    }
+    case 'watch': {
+      const { runWatch } = await import('./commands/watch.js');
+      await runWatch();
+      break;
+    }
+    case 'check': {
+      const { runCheck } = await import('./commands/check.js');
+      await runCheck();
       break;
     }
     case 'report': {
@@ -28,9 +33,12 @@ async function main(): Promise<void> {
       process.stdout.write(`
   vouch - Runtime safety for AI agents and AI-generated code
 
-  Commands:
+  Security Scanning:
     scan      Scan files for secrets, PII, injection patterns, unsafe code
-    init      Initialize Vouch in your project
+    watch     Real-time file watcher with live security scanning
+
+  Policy Management:
+    init      Initialize Vouch in your project (+ pre-commit hooks)
     check     Validate all policy files
     report    View your agent's behavioral report
 
@@ -38,9 +46,13 @@ async function main(): Promise<void> {
     vouch scan                  Scan current directory
     vouch scan --staged         Scan staged git changes (pre-commit)
     vouch scan --json           Machine-readable output for CI
-    vouch scan src/ config/     Scan specific paths
-    vouch init                  Set up Vouch + pre-commit hooks
+    vouch watch                 Watch files and scan on every save
+    vouch watch src/            Watch specific directory
+    vouch init                  Set up Vouch in your project
     vouch check                 Validate policy files
+
+  MCP Server (for AI coding tools):
+    npx vouch-mcp               Start the MCP server for Claude Code / Cursor
 
 `);
       if (command && command !== '--help' && command !== '-h') {

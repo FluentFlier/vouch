@@ -1,0 +1,22 @@
+{
+  "name": "vouch-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for Vouch - AI agents check security before writing code",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "vouch-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@vouch/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.0"
+  },
+  "keywords": ["mcp", "ai", "security", "vouch", "claude", "cursor"],
+  "license": "MIT"
+}
