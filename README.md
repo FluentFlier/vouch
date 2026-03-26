@@ -1,61 +1,28 @@
-Vouch is an open-source security layer for AI-generated code. It gives every file in your codebase a trust score (0-100), catches secrets and unsafe patterns, and runs as a background watcher while you vibe code.
+Vouch is an open-source security layer for AI-generated code. It gives every file in your codebase a deterministic trust score (0-100), catches secrets and unsafe patterns in real-time, and integrates with Claude Code and Cursor via MCP so the AI checks its own work before writing.
 
-## Install
+## Install (one time, works everywhere)
 
 ```bash
-# Clone and build (one time)
 git clone https://github.com/fluentflier/vouch.git ~/.vouch
 cd ~/.vouch && npm install -g pnpm && pnpm install && pnpm run build
-
-# Install globally (run `vouch` from any directory)
-bash ~/.vouch/scripts/install-global.sh
+mkdir -p ~/bin
+echo '#!/bin/bash
+node ~/.vouch/packages/cli/dist/index.js "$@"' > ~/bin/vouch
+chmod +x ~/bin/vouch
+echo 'export PATH="$HOME/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
 ```
 
-After install, `vouch` works from any project directory.
+Open a new terminal. `vouch` now works from any directory.
 
-## Usage
-
-```bash
-# Trust score for your codebase (0-100 per file)
-vouch verify
-
-# Scan for secrets and unsafe code
-vouch scan
-
-# Real-time watcher (scans every file save)
-vouch watch
-
-# Pre-commit hook (scan staged files before commit)
-vouch scan --staged
-
-# JSON output for CI
-vouch verify --json
-```
-
-### Set up in a new project
+## Verify it works
 
 ```bash
 cd your-project
-vouch init
+vouch verify
 ```
 
-This creates:
-- `vouch.policy.yaml` -- your security rules
-- `.mcp.json` -- MCP server config for Claude Code / Cursor
-- Pre-commit hook (optional, asks during init)
-
-### MCP server (AI checks before writing)
-
-The MCP server lets Claude Code and Cursor verify code BEFORE writing it. After `vouch init`, the `.mcp.json` is already configured. The AI gets these tools:
-
-- `verify_file` -- trust score with line-by-line findings and fix suggestions
-- `scan_content` -- scan for secrets, PII, injection patterns
-- `check_secret` -- check if a string is a credential
-- `check_safety` -- check for eval(), innerHTML, SQL injection
-
-### Trust scores
-
-`vouch verify` gives every file a trust score from 0 to 100:
+You should see something like:
 
 ```
   VOUCH VERIFY  636 files  0.2s
@@ -73,22 +40,58 @@ The MCP server lets Claude Code and Cursor verify code BEFORE writing it. After 
     INFO Line 47   fetch() without error handling  [AI]
          FIX: Wrap in try/catch or add .catch()
 
-  Files: 1 critical, 634 clean
+  Files: 1 critical, 1 warning, 634 clean
 ```
 
-Findings tagged `[AI]` are patterns specific to AI-generated code.
+## Commands
+
+| Command | What it does |
+|---------|-------------|
+| `vouch verify` | Trust score (0-100) per file with line-by-line findings and fixes |
+| `vouch scan` | Scan for secrets, PII, injection patterns, unsafe code |
+| `vouch scan --staged` | Scan only staged git changes (pre-commit hook) |
+| `vouch watch` | Real-time file watcher with live dashboard |
+| `vouch init` | Set up policy file, pre-commit hooks, MCP config |
+| `vouch verify --json` | Machine-readable output for CI pipelines |
+| `vouch scan --fix --apply` | Auto-fix: replace hardcoded secrets with env vars |
+
+## Set up in your project
+
+```bash
+cd your-project
+vouch init
+```
+
+Creates:
+- `vouch.policy.yaml` with default security rules
+- `.mcp.json` with MCP server config for Claude Code / Cursor
+- Pre-commit hook that runs `vouch scan --staged` before every commit
+
+## MCP server for Claude Code / Cursor
+
+After `vouch init`, the MCP server is auto-configured. It gives your AI coding tool 5 tools:
+
+| Tool | What it does |
+|------|-------------|
+| `verify_file` | Trust score with findings and fix suggestions. If score < 50, tells AI to fix before writing. |
+| `scan_content` | Scans for secrets, PII, injection, unsafe code |
+| `check_secret` | Checks if a string value is a credential |
+| `check_safety` | Checks for eval(), innerHTML, SQL injection |
+| `check_injection` | Detects prompt injection in external content |
+
+The AI can call `verify_file` before writing any file. If the trust score is below 50, it gets: "DO NOT write this file. Fix the critical issues first."
 
 ## What gets detected
 
 **Secrets:** AWS keys, GitHub tokens, OpenAI/Anthropic keys, Stripe keys, database URLs, private keys, Slack tokens, SendGrid keys, passwords, bearer tokens.
 
-**AI-specific patterns:** Inlined env vars, placeholder credentials, disabled SSL, wildcard CORS, chmod 777, debug endpoints, dangerouslySetInnerHTML.
+**AI-generated patterns (tagged [AI]):** Inlined environment variables, placeholder credentials, disabled SSL verification, wildcard CORS, chmod 777, dangerouslySetInnerHTML, unhandled fetch calls.
 
-**PII:** SSNs, credit cards (in source code).
+**PII:** SSNs, credit cards in source code.
 
 **Unsafe code:** eval(), innerHTML, SQL concatenation, command injection, wildcard IAM permissions, skip-verification flags.
 
-**Supports:** TypeScript, JavaScript, Python, Go, Rust, Java, Swift, Ruby, PHP, C/C++, Shell, SQL, YAML, JSON, Vue, Svelte, and 20+ more languages.
+**Languages:** TypeScript, JavaScript, Python, Go, Rust, Java, Kotlin, Swift, Ruby, PHP, C/C++, C#, Shell, SQL, YAML, JSON, Vue, Svelte, and 20+ more.
 
 ## GitHub Actions
 
@@ -96,28 +99,43 @@ Findings tagged `[AI]` are patterns specific to AI-generated code.
 - name: Vouch Trust Score
   run: |
     vouch verify --json
-    # Exit 2 = critical (trust < 50), Exit 1 = warning (trust < 80), Exit 0 = clean
+    # Exit 2 = trust < 50 (critical), Exit 1 = trust < 80 (warning), Exit 0 = clean
 ```
+
+## How trust scores work
+
+Every file gets a score from 0 to 100 based on deterministic checks (not AI opinions):
+
+- **CRITICAL findings** deduct 15 points each (max -60): hardcoded secrets, eval(), SSN in source
+- **WARNING findings** deduct 5 points each (max -25): disabled SSL, wildcard CORS, innerHTML
+- **INFO findings** deduct 1 point each (max -10): unhandled fetch, console.log with user data
+
+Test files get 0.5x deductions (they legitimately contain "unsafe" patterns).
+
+Codebase score = weighted average of file scores by lines of code.
+
+Every finding includes a plain-English explanation and a specific fix suggestion.
 
 ## Architecture
 
 ```
-packages/
-  core/           Trust score engine + security scanners (TypeScript)
-  sdk-ts/         TypeScript SDK: vouch.protect() wrapper
-  sdk-python/     Python SDK: identical API surface
-  cli/            CLI: verify, scan, watch, init, check, report
-  mcp-server/     MCP server for AI coding tools
-apps/
-  web/            Next.js dashboard + interactive demo
-policies/
-  builtin/        12 Jac policy walkers
-  examples/       YAML policy templates
+~/.vouch/
+  packages/
+    core/           Trust score engine + 11 security scanners
+    sdk-ts/         TypeScript SDK: vouch.protect()
+    sdk-python/     Python SDK: identical API
+    cli/            CLI: verify, scan, watch, init, check, report
+    mcp-server/     MCP server for AI coding tools
+  apps/
+    web/            Dashboard + interactive demo
+  policies/
+    builtin/        12 Jac policy walkers (deterministic verification)
+    examples/       4 YAML policy templates
 ```
 
 ## Runtime policy enforcement
 
-For AI agents that take actions (not just write code):
+For AI agents that take actions (send emails, create events, modify data):
 
 ```typescript
 import { createVouch } from 'vouch-sdk';
@@ -136,11 +154,15 @@ await vouch.protect(
 
 ## Built with Jac
 
-Policy walkers written in [Jac](https://jaseci.org) -- deterministic graph traversal for code verification. Not AI opinions. Facts.
+Trust scores are computed by Jac walkers -- deterministic graph traversal, not AI opinions. A Jac walker saying "this function has no error handling" is a provable fact. That's what makes Vouch different from AI-powered code reviewers.
 
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). 68 TypeScript + 14 Python tests.
+
+```bash
+cd ~/.vouch && pnpm run test
+```
 
 ## License
 
