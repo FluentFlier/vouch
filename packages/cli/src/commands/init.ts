@@ -1,4 +1,27 @@
 import { existsSync, readFileSync, writeFileSync, mkdirSync, chmodSync } from 'fs';
+
+function configureMcp(): void {
+  const mcpPath = '.mcp.json';
+  let config: Record<string, unknown> = {};
+
+  if (existsSync(mcpPath)) {
+    try {
+      config = JSON.parse(readFileSync(mcpPath, 'utf-8'));
+    } catch { /* invalid json, overwrite */ }
+  }
+
+  const servers = (config.mcpServers ?? {}) as Record<string, unknown>;
+  if ('vouch' in servers) return; // Already configured
+
+  servers.vouch = {
+    command: 'npx',
+    args: ['vouch-mcp'],
+    type: 'stdio',
+  };
+
+  config.mcpServers = servers;
+  writeFileSync(mcpPath, JSON.stringify(config, null, 2) + '\n');
+}
 import { createInterface } from 'readline';
 import { randomBytes } from 'crypto';
 import path from 'path';
@@ -151,11 +174,15 @@ rules:
     hookResult = installHooks(wantHusky);
   }
 
+  // Auto-configure MCP for Claude Code if .mcp.json doesn't have vouch
+  configureMcp();
+
   // Print summary
   process.stdout.write('\n');
   process.stdout.write(green(bold(`  Vouch initialized for ${projectName}\n`)));
   process.stdout.write('\n');
   process.stdout.write(`  Policy file:  ${cyan('vouch.policy.yaml')}\n`);
+  process.stdout.write(`  MCP config:   ${cyan('.mcp.json')} ${dim('(Claude Code / Cursor integration)')}\n`);
   if (hookResult) {
     process.stdout.write(`  Pre-commit:   ${green(hookResult)}\n`);
   }
