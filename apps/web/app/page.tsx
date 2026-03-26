@@ -91,8 +91,26 @@ export default function HomePage() {
           className="text-sm text-vouch-muted max-w-lg text-center leading-relaxed mb-14"
           style={{ animation: 'fade-in 1s ease-out 0.4s both', opacity: 0.5 }}
         >
-          One npm install. One wrapper function. Every agent action checked against your policies before it runs.
+          Scan code for secrets. Enforce policies at runtime. Watch files in real-time. Works with any AI coding tool.
         </p>
+
+        {/* CTA buttons */}
+        <div style={{ animation: 'fade-in 1s ease-out 0.5s both' }} className="flex gap-3 mb-4">
+          <a
+            href="/demo"
+            className="bg-vouch-green text-white font-mono text-sm px-6 py-2.5 rounded-lg hover:opacity-90 transition-opacity"
+          >
+            Try the scanner
+          </a>
+          <a
+            href="https://github.com/fluentflier/vouch"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="border border-vouch-line text-vouch-text font-mono text-sm px-6 py-2.5 rounded-lg hover:border-vouch-green/30 transition-all"
+          >
+            View on GitHub
+          </a>
+        </div>
 
         {/* Waitlist */}
         <div style={{ animation: 'fade-in 1s ease-out 0.6s both' }}>
@@ -139,10 +157,10 @@ export default function HomePage() {
       <section className="relative z-10 border-t border-b border-vouch-line/30 backdrop-blur-sm">
         <div className="max-w-5xl mx-auto px-8 py-14 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           {[
-            { value: '<10ms', label: 'PASS latency', color: '#16A34A' },
-            { value: 'YAML', label: 'Policy format', color: '#D97706' },
-            { value: 'TS + Py', label: 'Dual SDK', color: '#EDEDEA' },
-            { value: '0', label: 'User data stored', color: '#DC2626' },
+            { value: '10+', label: 'Security scanners', color: '#16A34A' },
+            { value: '<2s', label: 'Full repo scan', color: '#D97706' },
+            { value: 'MCP', label: 'AI tool integration', color: '#EDEDEA' },
+            { value: '0', label: 'Data sent anywhere', color: '#DC2626' },
           ].map((stat, i) => (
             <div
               key={stat.label}
@@ -179,7 +197,7 @@ export default function HomePage() {
           Three steps to verified agents
         </h2>
         <p className="text-vouch-muted text-sm text-center mb-16 max-w-md mx-auto">
-          Install the SDK, write a policy file, wrap your agent actions.
+          Clone, scan, protect. Works with any AI coding tool.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -187,8 +205,8 @@ export default function HomePage() {
             {
               num: '01',
               color: '#16A34A',
-              title: 'Define policies',
-              desc: 'YAML files declare what your agent can do. Jac walkers handle stateful rules like rate limiting and scope enforcement.',
+              title: 'Scan your code',
+              desc: '`vouch scan` finds secrets, PII, injection patterns, and unsafe code. AI-aware: catches patterns only AI-generated code produces.',
               icon: (
                 <svg width="36" height="36" viewBox="0 0 36 36" fill="none" className="mb-5">
                   <rect x="4" y="4" width="28" height="28" rx="6" stroke="#16A34A" strokeWidth="1.5" opacity="0.5"/>
@@ -199,8 +217,8 @@ export default function HomePage() {
             {
               num: '02',
               color: '#D97706',
-              title: 'Enforce at runtime',
-              desc: 'One wrapper function intercepts every action. PASS, BLOCK, or CONFIRM. Start in observe mode, switch to enforce when ready.',
+              title: 'Watch in real-time',
+              desc: '`vouch watch` monitors every file save. Live dashboard shows pass rate, recent events, and alerts. Pre-commit hooks block bad commits.',
               icon: (
                 <svg width="36" height="36" viewBox="0 0 36 36" fill="none" className="mb-5">
                   <path d="M18 4L32 11v9c0 7-6 12-14 16C10 32 4 27 4 20v-9L18 4z" stroke="#D97706" strokeWidth="1.5" opacity="0.5"/>
@@ -211,8 +229,8 @@ export default function HomePage() {
             {
               num: '03',
               color: '#DC2626',
-              title: 'Ship with confidence',
-              desc: 'Behavioral audit trail shows pass rate, actions verified, policies triggered. Self-host the dashboard or use the API. Zero user content stored.',
+              title: 'Integrate with AI tools',
+              desc: 'MCP server lets Claude Code and Cursor check security BEFORE writing code. GitHub Action blocks PRs with critical findings.',
               icon: (
                 <svg width="36" height="36" viewBox="0 0 36 36" fill="none" className="mb-5">
                   <circle cx="18" cy="18" r="13" stroke="#DC2626" strokeWidth="1.5" opacity="0.5"/>
