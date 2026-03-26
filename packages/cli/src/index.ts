@@ -14,6 +14,11 @@ async function main(): Promise<void> {
       await runCheck();
       break;
     }
+    case 'scan': {
+      const { runScan } = await import('./commands/scan.js');
+      await runScan();
+      break;
+    }
     case 'report': {
       const { runReport } = await import('./commands/report.js');
       await runReport();
@@ -21,17 +26,21 @@ async function main(): Promise<void> {
     }
     default:
       process.stdout.write(`
-  vouch - Runtime behavioral safety for AI agents
+  vouch - Runtime safety for AI agents and AI-generated code
 
   Commands:
+    scan      Scan files for secrets, PII, injection patterns, unsafe code
     init      Initialize Vouch in your project
     check     Validate all policy files
     report    View your agent's behavioral report
 
   Usage:
-    vouch init
-    vouch check
-    vouch report
+    vouch scan                  Scan current directory
+    vouch scan --staged         Scan staged git changes (pre-commit)
+    vouch scan --json           Machine-readable output for CI
+    vouch scan src/ config/     Scan specific paths
+    vouch init                  Set up Vouch + pre-commit hooks
+    vouch check                 Validate policy files
 
 `);
       if (command && command !== '--help' && command !== '-h') {

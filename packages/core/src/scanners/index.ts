@@ -6,3 +6,5 @@ export { checkContextIsolation, type IsolationCheckResult } from './cross-user-f
 export { auditCalibration, type CalibrationEntry, type CalibrationResult, type CalibrationReport } from './confidence-calibrator.js';
 export { checkUndoIntegrity, type UndoCheckResult, type UndoCapability } from './undo-integrity.js';
 export { checkSessionIntegrity, type SessionEvent, type SessionCheckResult } from './session-hijack.js';
+export { detectSecrets, scanFiles, type SecretFinding, type SecretSeverity } from './secret-detector.js';
+export { checkCodeSafety, type SafetyFinding, type SafetySeverity } from './code-safety.js';
